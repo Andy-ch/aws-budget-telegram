@@ -2,6 +2,6 @@ variable "daily_limit" {
   type = number
 }
 
-variable "monthly_limit {
+variable "monthly_limit" {
   type = number
 }
