@@ -80,7 +80,11 @@ jobs:
       run: echo "${{ secrets.ENCRYPTION_KEY }}" > vault_pass
 
     - name: Install Ansible
-      run: sudo apt update && sudo apt install -y ansible-core
+      run: |
+        set -e
+        sudo -E apt-add-repository --yes --update ppa:ansible/ansible
+        sudo apt update
+        sudo apt install -y ansible-core
 
     - name: Decrypt AWS credentials file
       run: ansible-vault decrypt --vault-pass-file vault_pass ~/.aws/credentials
