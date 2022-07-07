@@ -1,2 +1,2 @@
-daily_limit = .5
+daily_limit = 0.5
 montly_limit = 10
