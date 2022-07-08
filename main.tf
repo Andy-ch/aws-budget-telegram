@@ -60,7 +60,7 @@ resource "aws_budgets_budget" "daily" {
     comparison_operator       = "GREATER_THAN"
     threshold                 = 80
     threshold_type            = "PERCENTAGE"
-    notification_type         = "FORECASTED"
+    notification_type         = "ACTUAL"
     subscriber_sns_topic_arns = [aws_sns_topic.budget.arn]
   }
 }
