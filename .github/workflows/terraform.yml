@@ -89,6 +89,12 @@ jobs:
     - name: Decrypt AWS credentials file
       run: ansible-vault decrypt --vault-pass-file vault_pass ~/.aws/credentials
 
+    - name: Decrypt secret TF variables
+      run: ansible-vault decrypt --vault-pass-file vault_pass secrets.auto.tfvars
+
+    - name: Pack the Lambda zip file
+      run: zip lambda.zip lambda.py
+
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       run: terraform init

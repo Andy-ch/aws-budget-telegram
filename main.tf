@@ -13,3 +13,17 @@ resource "aws_budgets_budget" "monthly" {
   limit_unit   = "USD"
   time_unit    = "MONTHLY"
 }
+
+resource "aws_lambda_function" "notifier" {
+  filename      = "lambda.zip"
+  function_name = "budget_telegram_notifier"
+  role          = aws_iam_role.notifier.arn
+  handler       = "lambda.lambda_handler"
+  runtime       = "python3.9"
+  environment {
+    variables = {
+      TOKEN   = var.telegram_token
+      CHAT_ID = var.telegram_chat_id
+    }
+  }
+}
