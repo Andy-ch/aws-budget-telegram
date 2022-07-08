@@ -7,9 +7,11 @@ variable "monthly_limit" {
 }
 
 variable "telegram_token" {
-  type = string
+  type      = string
+  sensitive = true
 }
 
 variable "telegram_chat_id" {
-  type = string
+  type      = string
+  sensitive = true
 }
