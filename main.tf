@@ -15,8 +15,8 @@ resource "aws_budgets_budget" "monthly" {
 }
 
 resource "aws_iam_role" "notifier" {
-  name               = "budget_telegram_notifier"
-  assume_role_policy = <<EOF
+  name                = "budget_telegram_notifier"
+  assume_role_policy  = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -31,6 +31,7 @@ resource "aws_iam_role" "notifier" {
   ]
 }
 EOF
+  managed_policy_arns = ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
 }
 
 resource "aws_lambda_function" "notifier" {
