@@ -34,11 +34,12 @@ EOF
 }
 
 resource "aws_lambda_function" "notifier" {
-  filename      = "lambda.zip"
-  function_name = "budget_telegram_notifier"
-  role          = aws_iam_role.notifier.arn
-  handler       = "lambda.lambda_handler"
-  runtime       = "python3.9"
+  filename         = "lambda.zip"
+  source_code_hash = filebase64sha256("lambda.zip")
+  function_name    = "budget_telegram_notifier"
+  role             = aws_iam_role.notifier.arn
+  handler          = "lambda.lambda_handler"
+  runtime          = "python3.9"
   environment {
     variables = {
       TOKEN   = var.telegram_token
