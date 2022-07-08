@@ -107,7 +107,11 @@ jobs:
         exit 1
 
     - name: Pack the Lambda zip file
-      run: zip lambda.zip lambda.py
+      run: |
+        mkdir lambda
+        pip3 install -r requirements.txt -t lambda
+        cp lambda.py lambda/
+        zip lambda.zip lambda/*
 
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init

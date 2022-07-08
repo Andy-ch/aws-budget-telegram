@@ -8,6 +8,7 @@ then
   chmod +x "${REPO_DIR}/.git/hooks/pre-commit"
 fi
 "${SCRIPT_DIR}/fmt.sh"
+git add *.tf*
 for encrypted_file in {.aws/credentials,secrets.auto.tfvars}
 do
   if ! grep '$ANSIBLE_VAULT' "${encrypted_file}"
