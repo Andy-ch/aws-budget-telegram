@@ -26,8 +26,8 @@ def process_message(input):
 # Main Lambda handler
 def lambda_handler(event, context):
     # logging the event for debugging
-    logger.info("event=")
-    logger.info(json.dumps(event))
+    logger.debug("event=")
+    logger.debug(json.dumps(event))
 
     # Basic exception handling. If anything goes wrong, logging the exception
     try:
