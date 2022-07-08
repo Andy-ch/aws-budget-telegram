@@ -47,3 +47,20 @@ resource "aws_lambda_function" "notifier" {
     }
   }
 }
+
+resource "aws_sns_topic" "budget" {
+  name = "budget_notifier"
+}
+
+resource "aws_lambda_permission" "notifier" {
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.notifier.function_name
+  principal     = "sns.amazonaws.com"
+  source_arn    = aws_sns_topic.budget.arn
+}
+
+resource "aws_sns_topic_subscription" "budget" {
+  topic_arn = aws_sns_topic.budget.arn
+  protocol  = "lambda"
+  endpoint  = aws_lambda_function.notifier.arn
+}
