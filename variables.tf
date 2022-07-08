@@ -5,3 +5,11 @@ variable "daily_limit" {
 variable "monthly_limit" {
   type = number
 }
+
+variable "telegram_token" {
+  type = string
+}
+
+variable "telegram_chat_id" {
+  type = string
+}
