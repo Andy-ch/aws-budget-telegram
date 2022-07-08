@@ -1,19 +1,3 @@
-resource "aws_budgets_budget" "daily" {
-  name         = "daily-budget"
-  budget_type  = "COST"
-  limit_amount = var.daily_limit
-  limit_unit   = "USD"
-  time_unit    = "DAILY"
-}
-
-resource "aws_budgets_budget" "monthly" {
-  name         = "monthly-budget"
-  budget_type  = "COST"
-  limit_amount = var.monthly_limit
-  limit_unit   = "USD"
-  time_unit    = "MONTHLY"
-}
-
 resource "aws_iam_role" "notifier" {
   name                = "budget_telegram_notifier"
   assume_role_policy  = <<EOF
@@ -64,4 +48,34 @@ resource "aws_sns_topic_subscription" "budget" {
   topic_arn = aws_sns_topic.budget.arn
   protocol  = "lambda"
   endpoint  = aws_lambda_function.notifier.arn
+}
+
+resource "aws_budgets_budget" "daily" {
+  name         = "daily-budget"
+  budget_type  = "COST"
+  limit_amount = var.daily_limit
+  limit_unit   = "USD"
+  time_unit    = "DAILY"
+  notification {
+    comparison_operator       = "GREATER_THAN"
+    threshold                 = 80
+    threshold_type            = "PERCENTAGE"
+    notification_type         = "FORECASTED"
+    subscriber_sns_topic_arns = [aws_sns_topic.budget.arn]
+  }
+}
+
+resource "aws_budgets_budget" "monthly" {
+  name         = "monthly-budget"
+  budget_type  = "COST"
+  limit_amount = var.monthly_limit
+  limit_unit   = "USD"
+  time_unit    = "MONTHLY"
+  notification {
+    comparison_operator       = "GREATER_THAN"
+    threshold                 = 80
+    threshold_type            = "PERCENTAGE"
+    notification_type         = "FORECASTED"
+    subscriber_sns_topic_arns = [aws_sns_topic.budget.arn]
+  }
 }
