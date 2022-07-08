@@ -87,10 +87,24 @@ jobs:
         sudo apt install -y ansible-core
 
     - name: Decrypt AWS credentials file
+      id: aws-decrypt
+      continue-on-error: true
       run: ansible-vault decrypt --vault-pass-file vault_pass ~/.aws/credentials
 
     - name: Decrypt secret TF variables
+      id: tfvars-decrypt
+      continue-on-error: true
       run: ansible-vault decrypt --vault-pass-file vault_pass secrets.auto.tfvars
+
+    - name: Check for decryption failures
+      if: steps.aws-decrypt.outcome != 'success' || steps.tfvars-decrypt.outcome != 'success'
+      run: |
+        echo 'Ansible Vault decryption failed. .aws/credentials and secrets.auto.tfvars files must be encrypted with Ansible Vault with the ENCRYPTION_KEY secret of your Github repository.
+        It is possible that your credentials are stored in the PUBLIC Github repository UNENCRYPTED!!!
+        This may cause your AWS account to be used for malicious activities!!!
+        If any credentials may have leaked into the public (AWS CLI keys, or Telegram bot credentials), change them ASAP!!!
+        Run ./scripts/precommit.sh script locally to set up a Git hook that will verify the state of the encrypted files before committing'
+        exit 1
 
     - name: Pack the Lambda zip file
       run: zip lambda.zip lambda.py
