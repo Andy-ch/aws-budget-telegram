@@ -112,7 +112,7 @@ jobs:
         pip3 install -r requirements.txt -t lambda
         cp lambda.py lambda/
         cd lambda
-        zip ../lambda.zip *
+        zip -r ../lambda.zip *
 
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
