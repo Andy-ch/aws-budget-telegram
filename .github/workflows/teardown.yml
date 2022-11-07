@@ -1,0 +1,79 @@
+name: Teardown
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    environment: production
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+
+    - name: Install AWS credentials file
+      run: cp -r .aws ~/.aws
+
+    - name: Write down the decryption key
+      run: echo "${{ secrets.ENCRYPTION_KEY }}" > vault_pass
+
+    - name: Install Ansible
+      run: |
+        set -e
+        sudo -E apt-add-repository --yes --update ppa:ansible/ansible
+        sudo apt update
+        sudo apt install -y ansible-core
+
+    - name: Decrypt AWS credentials file
+      id: aws-decrypt
+      continue-on-error: true
+      run: ansible-vault decrypt --vault-pass-file vault_pass ~/.aws/credentials
+
+    - name: Decrypt secret TF variables
+      id: tfvars-decrypt
+      continue-on-error: true
+      run: ansible-vault decrypt --vault-pass-file vault_pass secrets.auto.tfvars
+
+    - name: Check for decryption failures
+      if: steps.aws-decrypt.outcome != 'success' || steps.tfvars-decrypt.outcome != 'success'
+      run: |
+        echo 'Ansible Vault decryption failed. .aws/credentials and secrets.auto.tfvars files must be encrypted with Ansible Vault with the ENCRYPTION_KEY secret of your Github repository.
+        It is possible that your credentials are stored in the PUBLIC Github repository UNENCRYPTED!!!
+        This may cause your AWS account to be used for malicious activities!!!
+        If any credentials may have leaked into the public (AWS CLI keys, or Telegram bot credentials), change them ASAP!!!
+        Run ./scripts/precommit.sh script locally to set up a Git hook that will verify the state of the encrypted files before committing'
+        exit 1
+
+    - name: Pack the Lambda zip file
+      run: |
+        mkdir lambda
+        pip3 install -r requirements.txt -t lambda
+        cp lambda.py lambda/
+        cd lambda
+        zip -r ../lambda.zip *
+
+    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+    - name: Terraform Init
+      run: terraform init
+
+    # Checks that all Terraform configuration files adhere to a canonical format
+    - name: Terraform Format
+      run: terraform fmt -check
+
+    - name: Terraform Destroy
+      run: terraform destroy -auto-approve -input=false
